@@ -1,0 +1,2 @@
+# GunGameScript
+Only Script
