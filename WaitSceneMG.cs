@@ -313,7 +313,7 @@ public class WaitSceneMG : MonoBehaviour {
             mediaPlayer.OpenVideoFromFile(MediaPlayer.FileLocation.RelativeToStreamingAssetsFolder, "Video/Teach Video.mp4");
 
         }
-
+        /////
         Debug.Log("TeachingMethod");
     }
 
