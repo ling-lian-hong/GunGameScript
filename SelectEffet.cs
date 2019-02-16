@@ -30,7 +30,9 @@ public class SelectEffet : MonoBehaviour {
 
     private bool isInit = false;
 
+    [Header("对应的人物模型")]
     public GameObject model;
+    [Header("对应的人物Animator")]
     public Animator ani;
     void Awake()
     {
@@ -56,7 +58,6 @@ public class SelectEffet : MonoBehaviour {
         }
 
     }
-
     /// <summary>
     /// 改变材质
     /// </summary>
@@ -107,28 +108,25 @@ public class SelectEffet : MonoBehaviour {
         }
     }
 
-    public void ChangeModel(bool isShow) {
+    public void ChangeModel(bool isShow)
+    {
         if (model == null)
             return;
         if (isShow)
         {
             model.SetActive(true);
-            if (ani!=null)
-            {
-                
-                ani.SetBool("Play",true);
-            }
-          
-        }
-        else {
-            if (ani != null)
-            {
 
-                ani.SetBool("Play", false);
-            }
+        }
+        else
+        {
             model.SetActive(false);
             model.transform.localPosition = Vector3.zero;
-            model.transform.localEulerAngles = new Vector3(90, 0, 0);
+            model.transform.localEulerAngles = Vector3.zero;
         }
+    }
+
+    public void SetConfirmAni() {
+        Debug.Log(transform.name + "确认动作");
+        ani.SetBool("IsConfirm",true);
     }
 }

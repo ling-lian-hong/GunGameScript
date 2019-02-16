@@ -1,14 +1,14 @@
-﻿using System.Collections;
+﻿using RenderHeads.Media.AVProVideo;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using DG.Tweening;
-using System;
-using RenderHeads.Media.AVProVideo;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
+using DG.Tweening;
 public class WaitSceneMG : MonoBehaviour {
-    public Camera waitSceneCam;
+    [Header("当前场景主摄像机"),SerializeField]
+    private Camera waitSceneCam;
     [Header("射线检测的层"), SerializeField]
     private LayerMask layermask;
     [Header("射线检测距离"), SerializeField]
@@ -47,23 +47,34 @@ public class WaitSceneMG : MonoBehaviour {
 
     #region 人物属性
     [Header("-----------人物属性------------")]
-    public RoleAttribute[] roleAttribute;
-    private Dictionary<int, RoleAttribute> roleAttributeDis = new Dictionary<int, RoleAttribute>();
-
+    public RoleAttributeData roleAttributeData;
+    public List<RoleAttribute> roleAttributeList = new List<RoleAttribute>();
     public AttributeUI attributeUI;
     #endregion
     //---------------------------2.15-----
     /// <summary>
     /// WaitScene 所有的游戏状态
     /// </summary>
-    public enum WaitSceneState {
+    public enum WaitSceneState
+    {
         Standby,
         Choosing
     }
     public WaitSceneState waitSceneState = WaitSceneState.Standby;
 
+    //一位数 个位数材质
+    public Material singleM;
+    //两位数 个位数材质
+    public Material doubleSingleM;
+    //两位数 个位数材质
+    public Material doubleTenM;
+
+    public GameObject singleMObj;
+
+    public GameObject doubleMObj;
+
     // 是否倒计时
-    private bool isAutoCountDown= true;
+    private bool isAutoCountDown = true;
 
     //一秒时间
     private float oneTime;
@@ -75,7 +86,7 @@ public class WaitSceneMG : MonoBehaviour {
     private float eventTime;
 
     //倒计时时间集合
-    private float[] eventTimes = new float[2] { 7, 5};
+    private float[] eventTimes = new float[2] { 7, 5 };
 
     [Header("教学视频时长")]
     public float teachingVideoTime;
@@ -109,17 +120,30 @@ public class WaitSceneMG : MonoBehaviour {
     public AsyncOperation operation;
 
     public float loadingValue;
+    //---------------------------------
+    [Header("眨眼屏幕特效"),SerializeField]
+    private CameraFilterPack_TV_WideScreenHorizontal cameraEffect;
 
+    private bool isConfirm = false;
+    //-------------------------------------
     private void OnEnable()
     {
         Time2Do += EmptyMethod;
         eventTimes[0] = StandbyVideoTime;
         eventTimes[1] = teachingVideoTime;
+     //   Debug.Log(GameObject.Find("MainCamera"));
+        waitSceneCam =GameObject.Find("MainCamera").GetComponent<Camera>();
+        if (waitSceneCam.GetComponent<CameraFilterPack_TV_WideScreenHorizontal>()==null)
+        {
+            waitSceneCam.gameObject.AddComponent<CameraFilterPack_TV_WideScreenHorizontal>();
+        }
+        cameraEffect = waitSceneCam.GetComponent<CameraFilterPack_TV_WideScreenHorizontal>();
     }
 
     private void OnDisable()
     {
         Time2Do -= EmptyMethod;
+       
     }
 
     void Start() {
@@ -132,33 +156,49 @@ public class WaitSceneMG : MonoBehaviour {
             nameRenderer.material.SetFloat("_weizhi", currSelectRoleID);
             roleDataRenderer.material.SetFloat("_weizhi", currSelectRoleID);
         }
+
+        RoleAttributeDataInit();
+
         oneTime = Time.time + 1;
         eventTime = eventTimes[0];
-        if (coinSum>0)
+        if (coinSum > 0)
         {
             ToChooseState();
         }
-        //waitSceneCam.clearFlags = CameraClearFlags.Color;
     }
 
     void Update() {
-        CursorBehavior();
-
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (!isConfirm)
         {
-
+            CursorBehavior();
         }
+      
 
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            PayACoin();
-        }
+        MyInput();
 
         if (isAutoCountDown)
         {
             Timing();
         }
-       
+
+        LoadSceneMethod();
+    }
+
+    [ContextMenu("配置信息")]
+    public void RoleAttributeDataInit() {
+        if (roleAttributeData!=null)
+        {
+            roleAttributeList.Clear();
+            for (int i = 0; i < roleAttributeData.roleAttributes.Length; i++)
+            {
+                roleAttributeList.Add(roleAttributeData.roleAttributes[i]);
+            }
+           
+        }
+        else
+        {
+            Debug.Log("roleAttributeData 未赋值");
+        }
     }
 
     /// <summary>
@@ -175,57 +215,69 @@ public class WaitSceneMG : MonoBehaviour {
 
             if (hit.transform != null)
             {
-                //   Debug.Log(hit.transform.name);
+             //   Debug.Log(hit.transform.name);
                 switch (hit.transform.name)
                 {
                     case Role_1_Name:
                         currSelectRoleID = 1;
                         SelectRole();
-                        LeaveConfirmUI();
-
+                      
+                      //  LeaveConfirmUI();
                         break;
                     case Role_2_Name:
                         currSelectRoleID = 2;
                         SelectRole();
-                        LeaveConfirmUI();
+                      //  LeaveConfirmUI();
                         break;
                     case Role_3_Name:
                         currSelectRoleID = 3;
                         SelectRole();
-                        LeaveConfirmUI();
+                      //  LeaveConfirmUI();
                         break;
                     case Role_4_Name:
                         currSelectRoleID = 4;
                         SelectRole();
-                        LeaveConfirmUI();
+                      //  LeaveConfirmUI();
                         break;
                     case Role_5_Name:
                         currSelectRoleID = 5;
                         SelectRole();
-                        LeaveConfirmUI();
+                        //LeaveConfirmUI();
                         break;
                     case Role_6_Name:
                         currSelectRoleID = 6;
                         SelectRole();
-                        LeaveConfirmUI();
+                      //  LeaveConfirmUI();
                         break;
                     case Role_7_Name:
                         currSelectRoleID = 7;
                         SelectRole();
-                        LeaveConfirmUI();
+                      //  LeaveConfirmUI();
                         break;
                     case Role_8_Name:
                         currSelectRoleID = 8;
                         SelectRole();
-                        LeaveConfirmUI();
+                      //  LeaveConfirmUI();
                         break;
                     //case ConfirmUIName:
-                    // Confirm();
-                    // break;
+                       // Confirm();
+                       // break;
 
                     default:
                         break;
                 }
+
+                #region 键鼠交互  确认
+                if (Input.GetKeyDown(KeyCode.Mouse0))
+                {
+                    if (roleAttributeList.Count >= currSelectRoleID && roleAttributeList.Count != 0)
+                    {
+                        Confirm(roleAttributeList[currSelectRoleID - 1].SceneIndex);
+                        RoleSelectEffetScript[currSelectRoleID - 1].SetConfirmAni();
+                    }
+                   
+                }
+                #endregion
 
             }
 
@@ -243,7 +295,7 @@ public class WaitSceneMG : MonoBehaviour {
     private void SelectRole() {
         if (currSelectRoleID == oldSelectRoleID)
             return;
-        if (RoleSelectEffetScript[currSelectRoleID - 1] != null)
+        if (RoleSelectEffetScript[currSelectRoleID - 1]!=null)
         {
             RoleSelectEffetScript[oldSelectRoleID - 1].TransformChange(false);
             RoleSelectEffetScript[oldSelectRoleID - 1].ChangeMaterial(false);
@@ -251,78 +303,117 @@ public class WaitSceneMG : MonoBehaviour {
         }
         if (RoleSelectEffetScript[currSelectRoleID - 1] != null)
         {
-
+          
             RoleSelectEffetScript[currSelectRoleID - 1].TransformChange(true);
             RoleSelectEffetScript[currSelectRoleID - 1].ChangeMaterial(true);
             RoleSelectEffetScript[currSelectRoleID - 1].ChangeModel(true);
             nameRenderer.material.SetFloat("_weizhi", currSelectRoleID);
             roleDataRenderer.material.SetFloat("_weizhi", currSelectRoleID);
+            SetRoleAttribute(currSelectRoleID);
         }
-        oldSelectRoleID = currSelectRoleID;
+      
+        oldSelectRoleID= currSelectRoleID;
     }
 
+    #region （弃用）
     /// <summary>
     /// 确定(弃用)
     /// </summary>
-    private void Confirm() {
+    //private void Confirm()
+    //{
 
-        if (!leaveConfirmPlane)
-        {
-            if (confirmPlane != null)
-            {
-                confirmPlane.IsStayOn(true);
-            }
-        }
+    //    if (!leaveConfirmPlane)
+    //    {
+    //        if (confirmPlane != null)
+    //        {
+    //            confirmPlane.IsStayOn(true);
+    //        }
+    //    }
 
-        leaveConfirmPlane = true;
+    //    leaveConfirmPlane = true;
 
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            // Debug.Log("射击");
-            if (confirmPlane != null)
-            {
-                RoleSelectEffetScript[currSelectRoleID - 1].ChangeMaterial(true);
+    //    if (Input.GetKeyDown(KeyCode.Mouse0))
+    //    {
+    //        // Debug.Log("射击");
+    //        if (confirmPlane != null)
+    //        {
+    //            RoleSelectEffetScript[currSelectRoleID - 1].ChangeMaterial(true);
 
-                // confirmPlane.ClickConfirm();
-            }
-        }
-    }
+    //            // confirmPlane.ClickConfirm();
+    //        }
+    //    }
+    //}
 
     /// <summary>
     /// 离开确认按键（弃用）
     /// </summary>
-    private void LeaveConfirmUI() {
-        if (leaveConfirmPlane)
-        {
-            leaveConfirmPlane = false;
-            if (confirmPlane != null)
-            {
-                confirmPlane.IsStayOn(false);
-            }
+    //private void LeaveConfirmUI()
+    //{
+    //    if (leaveConfirmPlane)
+    //    {
+    //        leaveConfirmPlane = false;
+    //        if (confirmPlane != null)
+    //        {
+    //            confirmPlane.IsStayOn(false);
+    //        }
 
-        }
-    }
+    //    }
+    //}
+    #endregion
 
     /// <summary>
     /// 设置人物对应的属性
     /// </summary>
-    private void SetRoleAttribute(int _roleID) {
-        if (roleAttributeDis.ContainsKey(_roleID))
+    private void SetRoleAttribute(int _roleID)
+    {
+        if (attributeUI == null)
+            return;
+        if (roleAttributeList.Count >= _roleID && roleAttributeList.Count != 0)
         {
-            attributeUI.SetValue(roleAttributeDis[_roleID]);
-        }
 
-        //roleAttribute[0].attribute[0].
+            attributeUI.SetValue(roleAttributeList[_roleID - 1]);
+        }
+        else
+        {
+            attributeUI.Hide(true);
+        }
     }
 
     /// <summary>
     /// 计时
     /// </summary>
-    private void Timing() {
+    private void Timing()
+    {
         if (Time.time >= oneTime)
         {
             oneTime = Time.time + 1;
             timer += 1;
+            if (waitSceneState==WaitSceneState.Choosing)
+            {
+                if (timer > 0 && timer < 10)
+                {
+                    singleMObj.SetActive(true);
+                    doubleMObj.SetActive(false);
+
+                    singleM.SetFloat("_fanda", 0f);
+                    singleM.DOFloat(1, "_fanda", 1);
+                    singleM.SetFloat("_daoshu_sil", timer);
+                }
+                else if (timer >= 10 && timer < 100)
+                {
+                    singleMObj.SetActive(false);
+                    doubleMObj.SetActive(true);
+
+                    doubleSingleM.SetFloat("_fanda", 0f);
+                    doubleSingleM.DOFloat(1f, "_fanda", 1f);
+                    doubleSingleM.SetFloat("_daoshu_sil", timer % 10);
+
+                    doubleTenM.SetFloat("_fanda", 0f);
+                    doubleTenM.DOFloat(1f, "_fanda", 1);
+                    doubleTenM.SetFloat("_daoshu_sil", timer / 10);
+                }
+            }
+          
             if (timer >= eventTime)
             {
                 timer = 0;
@@ -335,41 +426,46 @@ public class WaitSceneMG : MonoBehaviour {
     /// <summary>
     /// 倒计时到了该执行的方法
     /// </summary>
-    private void DoSomething() {
+    private void DoSomething()
+    {
         switch (waitSceneState)
         {
             case WaitSceneState.Standby:
-               // isAutoCountDown = false;
+                // isAutoCountDown = false;
                 timeIndex = (timeIndex + 1) % eventTimes.Length;
                 eventTime = eventTimes[timeIndex];
+                TransitionEffect();
                 SetTime2Do(timeIndex);
                 break;
             case WaitSceneState.Choosing:
                 isAutoCountDown = false;
                 Time2Do = AutoChoose;
+                Time2Do();
                 break;
             default:
                 break;
         }
-        Time2Do();
+     
     }
 
     /// <summary>
     /// 待机视频阶段的方法
     /// </summary>
-    private void StandbyMethod(){
-        if (mediaPlayer!=null)
+    private void StandbyMethod()
+    {
+        if (mediaPlayer != null)
         {
             mediaPlayer.CloseVideo();
             mediaPlayer.OpenVideoFromFile(MediaPlayer.FileLocation.RelativeToStreamingAssetsFolder, "Video/Standby Video.mp4");
-        }     
+        }
         Debug.Log("StandbyMethod");
     }
 
     /// <summary>
     /// 教学视频阶段的方法
     /// </summary>
-    private void TeachingMethod() {
+    private void TeachingMethod()
+    {
         if (mediaPlayer != null)
         {
             mediaPlayer.CloseVideo();
@@ -381,14 +477,35 @@ public class WaitSceneMG : MonoBehaviour {
     }
 
     /// <summary>
+    /// 选择人物阶段方法
+    /// </summary>
+    private void ChooseMethod() {
+        if (mediaPlayer != null)
+        {
+            mediaPlayer.CloseVideo();
+            mediaPlayer.OpenVideoFromFile(MediaPlayer.FileLocation.RelativeToStreamingAssetsFolder, "Video/Standby Video.mp4");
+        }
+        isAutoCountDown = true;
+        oneTime = Time.time + 1;
+        timer = 0;
+        eventTime = 15;
+        singleM.SetFloat("_fanda", 1f);
+       // singleM.DOFloat(1, "_fanda", 1);
+        singleM.SetFloat("_daoshu_sil", timer);
+        SelectObj.SetActive(true);
+    }
+
+    /// <summary>
     /// 设置倒计时到了该执行的方法
     /// </summary>
     /// <param name="_index"></param>
-    private void SetTime2Do(int _index) {
+    private void SetTime2Do(int _index)
+    {
         switch (_index)
         {
             case 0:
                 Time2Do = StandbyMethod;
+               
                 break;
             case 1:
                 Time2Do = TeachingMethod;
@@ -401,8 +518,12 @@ public class WaitSceneMG : MonoBehaviour {
     /// <summary>
     /// 自动选择人物
     /// </summary>
-    private void AutoChoose() {
+    private void AutoChoose()
+    {
         Debug.Log("自动选择");
+        int _roleIndex = UnityEngine.Random.Range(0, roleAttributeList.Count);
+        RoleSelectEffetScript[_roleIndex].SetConfirmAni();
+        Confirm(roleAttributeList[_roleIndex].SceneIndex);
     }
 
     /// <summary>
@@ -413,9 +534,10 @@ public class WaitSceneMG : MonoBehaviour {
     /// <summary>
     /// 投一个币
     /// </summary>
-    private void PayACoin() {
-  
-        if (coinSum==0)
+    private void PayACoin()
+    {
+      //  coinSum = LLH_CoinData.GetCurrCoin();
+        if (coinSum == 0)
         {
             ToChooseState();
         }
@@ -425,33 +547,47 @@ public class WaitSceneMG : MonoBehaviour {
     /// <summary>
     /// 变为选择人物阶段
     /// </summary>
-    private void ToChooseState() {
-        waitSceneState = WaitSceneState.Choosing;
-        oneTime = Time.time + 1;
-        timer =0;
-        eventTime = 15;
-        SelectObj.SetActive(true);
-        if (mediaPlayer != null)
-        {
-            mediaPlayer.OpenVideoFromFile(MediaPlayer.FileLocation.RelativeToStreamingAssetsFolder, "Video/Standby Video.mp4");
-        }
-    }
-
-    private void LoadScene() {
-        StartCoroutine(AsyncLoading());
-    }
-
-    IEnumerator AsyncLoading()
+    private void ToChooseState()
     {
-        yield return new WaitForSeconds(1);
-        operation = SceneManager.LoadSceneAsync(0);
+        waitSceneState = WaitSceneState.Choosing;
+        isAutoCountDown = false;
+        Time2Do = ChooseMethod;
+        TransitionEffect();
+        //if (mediaPlayer != null)
+        //{
+        //    mediaPlayer.OpenVideoFromFile(MediaPlayer.FileLocation.RelativeToStreamingAssetsFolder, "Video/Standby Video.mp4");
+        //}
+    }
+
+    /// <summary>
+    /// 加载索引对应的场景
+    /// </summary>
+    /// <param name="_sceneIndex"></param>
+    private void LoadScene(int _sceneIndex)
+    {
+        StartCoroutine(AsyncLoading(_sceneIndex));
+    }
+
+    /// <summary>
+    /// 异步加载
+    /// </summary>
+    /// <param name="_sceneIndex"></param>
+    /// <returns></returns>
+    IEnumerator AsyncLoading(int _sceneIndex)
+    {
+      //  yield return new WaitForSeconds(1);
+        operation = SceneManager.LoadSceneAsync(_sceneIndex);
         //阻止当加载完成自动切换
         operation.allowSceneActivation = false;
 
         yield return operation;
     }
 
-    private void LoadSceneMethod() {
+    /// <summary>
+    /// 加载方法
+    /// </summary>
+    private void LoadSceneMethod()
+    {
         if (operation == null)
             return;
         targetValue = operation.progress;
@@ -462,7 +598,6 @@ public class WaitSceneMG : MonoBehaviour {
             targetValue = 1.0f;
         }
 
-      
         if (targetValue != loadingValue)
         {
             loadingValue = Mathf.Lerp(loadingValue, targetValue, Time.deltaTime * loadingSpeed);
@@ -474,7 +609,7 @@ public class WaitSceneMG : MonoBehaviour {
             if (m_currValue != m_oldValue)
             {
                 m_oldValue = m_currValue;
-                loadingText.text = m_currValue.ToString() + "%";
+               // loadingText.text = m_currValue.ToString() + "%";
             }
 
         }
@@ -483,9 +618,86 @@ public class WaitSceneMG : MonoBehaviour {
         {
             m_targetValue = -100;
 
+            if (waitSceneCam.GetComponent<CameraFilterPack_TV_WideScreenHorizontal>() != null)
+            {
+                Destroy(waitSceneCam.gameObject.GetComponent<CameraFilterPack_TV_WideScreenHorizontal>());
+            }
             //允许异步加载完毕后自动切换场景
             operation.allowSceneActivation = true;
 
         }
     }
+
+    #region 场景镜头过渡效果
+    private void TransitionEffect()
+    {
+        if (cameraEffect == null)
+            return;
+        DOTween.To(() => cameraEffect.Smooth, x => cameraEffect.Smooth = x, 0.4f, 0.5f).OnComplete(CameraEffect_EyeOpen);
+        DOTween.To(() => cameraEffect.Size, x => cameraEffect.Size = x, 0f, 0.5f).OnComplete(CameraEffect_EyeOpen);
+    }
+
+
+    private void CameraEffect_EyeOpen()
+    {
+        Time2Do();
+        DOTween.To(() => cameraEffect.Size, x => cameraEffect.Size = x, 0.8f,0.5f);
+        DOTween.To(() => cameraEffect.Size, x => cameraEffect.Smooth = x, 0f, 0.5f);
+    }
+
+    #endregion
+
+    /// <summary>
+    /// 交互 输入
+    /// </summary>
+    private void MyInput() {
+        #region 键鼠方法
+
+        //枪射击
+        //if (Input.GetKeyDown(KeyCode.Mouse0))
+        //{
+        //    if (waitSceneState == WaitSceneState.Choosing)
+        //    {
+        //        Confirm();
+        //    }
+        //}
+
+        //投币
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            PayACoin();
+        }
+
+        //模拟加载场景
+        //if (Input.GetKeyDown(KeyCode.Alpha1))
+        //{
+        //    LoadScene(1);
+        //}
+        //if (Input.GetKeyDown(KeyCode.Alpha2))
+        //{
+        //    LoadScene(2);
+        //}
+        //if (Input.GetKeyDown(KeyCode.Alpha3))
+        //{
+        //    LoadScene(3);
+        //}
+        #endregion
+
+        #region 手柄或者其他输入
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 确认
+    /// </summary>
+    private void Confirm(int _sceneIndex) {
+        if (isConfirm)
+            return;
+        isConfirm = true;
+        isAutoCountDown = false;
+        SelectObj.SetActive(false);
+        LoadScene(_sceneIndex);
+    }
+
 }
