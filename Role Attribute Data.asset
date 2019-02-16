@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9904f132f1847944c82c05044ada709a, type: 3}
+  m_Name: Role Attribute Data
+  m_EditorClassIdentifier: 
+  roleAttributes:
+  - RoleName: "\u5E9F\u571F\u6218\u58EB"
+    LifeValue: 100
+    AttackValue: 25
+    ShootSpeedValue: 12
+    AgileValue: 25
+    SceneIndex: 1
+  - RoleName: Lala
+    LifeValue: 57
+    AttackValue: 57
+    ShootSpeedValue: 68
+    AgileValue: 4
+    SceneIndex: 2
+  - RoleName: YoungBlack
+    LifeValue: 15
+    AttackValue: 35
+    ShootSpeedValue: 69
+    AgileValue: 37.87
+    SceneIndex: 3
+  - RoleName: "\u514B\u62C9\u514B"
+    LifeValue: 5
+    AttackValue: 135
+    ShootSpeedValue: 5
+    AgileValue: 485
+    SceneIndex: 1
+  - RoleName: "\u79CB\u838E"
+    LifeValue: 28
+    AttackValue: 368
+    ShootSpeedValue: 58
+    AgileValue: 48
+    SceneIndex: 2
